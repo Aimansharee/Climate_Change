@@ -1,177 +1,268 @@
 # 🌍 Climate Change Analysis & Machine Learning Dashboard
 
-مشروع هندسي متكامل لتحليل واستكشاف بيانات التغير المناخي العالمية باستخدام تقنيات تعلم الآلة (Machine Learning) والتعلم العميق (Deep Learning)، مع واجهة تفاعلية مبنية بواسطة **Streamlit**، ومغطى بنظام اختبارات أوتوماتيكية شاملة باستخدام **pytest**.
+A comprehensive engineering project for analyzing and exploring global climate change data using **Machine Learning** and **Deep Learning** techniques. The project features an interactive dashboard built with **Streamlit** and is supported by a comprehensive automated testing suite using **pytest**.
 
 ---
 
-## 📌 نبذة عن المشروع (Project Overview)
+## 📌 Project Overview
 
-يهدف المشروع إلى دراسة وتحليل المؤشرات البيئية والمناخية الرئيسية (درجات الحرارة، انبعاثات غاز ثاني أكسيد الكربون $CO_2$، معدلات هطول الأمطار، الرطوبة، وسرعة الرياح) عبر محطات رصد موزعة على 243 دولة عبر أكثر من 20 عاماً. 
+This project aims to investigate and analyze major environmental and climate indicators, including temperature, carbon dioxide (`CO2`) emissions, precipitation, humidity, and wind speed, using observations collected from monitoring stations across **243 countries over more than 20 years**.
 
-يتيح التطبيق:
-- استكشاف الأنماط والاتجاهات المناخية زمنياً وجغرافياً.
-- تصنيف وتقسيم المناطق والمحطات المناخية باستخدام خوارزميات التجميع (**K-Means** و **DBSCAN**).
-- تقليص الأبعاد وتمثيل البيانات المعقدة بصرياً في فضاء ثنائي الأبعاد عبر شبكات الترميز التلقائي للتعلم العميق (**Autoencoder**).
+The application enables users to:
 
----
-
-## 🧹 معالجة وتنظيف البيانات (Data Preprocessing & Cleaning)
-
-تمت معالجة البيانات وتنظيفها وتجهيزها بشكل كامل وموثوق باستخدام مكتبتي **Pandas** و **NumPy**، وتضمنت الخطوات التالية:
-
-1. **التعامل مع التواريخ والترتيب الزمني (DateTime Parsing & Sorting):**
-   - تحويل حقل `Date` إلى نوع `datetime` زمني قياسي عبر `pd.to_datetime()`.
-   - استخراج حقل السنة `Year` لتسهيل التصفية الزمنية والتحليل الإحصائي السنوي.
-   - ترتيب السجلات زمنياً تصاعدياً (`sort_values`) لضمان صحة ودقة السلاسل الزمنية.
-
-2. **معالجة القيم المفقودة (Handling Missing Values):**
-   - فحص السجلات والتحقق من سلامتها، مع حذف أي سجلات تحتوي على تواريخ غير صالحة عبر `dropna(subset=['Date'])`.
-
-3. **اكتشاف واستبعاد القيم الشاذة والمتطرفة (Outlier Detection & Removal):**
-   - تطبيق الدرجة المعيارية **Z-Score** إحصائياً عبر مصفوفات `NumPy` ومكتبة `SciPy` لحساب انحراف كل نقطة بيانات عن المتوسط الحسابي.
-   - تصفية واستبعاد القيم المتطرفة التي تتجاوز حد $\pm 3\sigma$ لجميع المتغيرات العددية (`Temperature`, `CO2 Emissions`, `Precipitation`, `Humidity`, `Wind Speed`)، حيث تم تنظيف 57 قيمة متطرفة بنجاح ليصبح إجمالي البيانات النظيفة **9,943 سجلاً**.
-
-4. **المعايرة والتجهيز للتعلم العميق (Feature Scaling):**
-   - تطبيق المعايرة الميدانية `MinMaxScaler` على الخصائص الخمس لنطاق $[0, 1]$ قبل تمريرها لشبكة الـ Autoencoder لضمان التوافق الرياضي التام مع دالة التفعيل `sigmoid`.
+- Explore climate patterns and trends across time and geographical locations.
+- Identify and group climate regions and monitoring stations using clustering algorithms (**K-Means** and **DBSCAN**).
+- Reduce dimensionality and visualize complex multidimensional data in a two-dimensional space using a **Deep Learning Autoencoder**.
 
 ---
 
-## ✨ المميزات الرئيسية للتطبيق (Features)
+## 🧹 Data Preprocessing & Cleaning
 
-1. **الصفحة الرئيسية (Home):**
-   - شريط جانبي متقدم لتصفية البيانات حسب الموقع/الدولة، ونوع المتغير المناخي، والنطاق الزمني للسنين.
-   - جدول تفاعلي ذكي يعرض البيانات المفلترة في الوقت الفعلي.
+The dataset was comprehensively processed, cleaned, and prepared using **Pandas** and **NumPy**, following these steps:
 
-2. **الرسوم البيانية المتقدمة (Graphs):**
-   - **Dual-Axis Chart:** رسم زمني تفاعلي مزدوج المحاور يوضح العلاقة المباشرة بين درجات الحرارة وانبعاثات $CO_2$.
-   - **Global Choropleth Map:** خريطة جغرافية حرارية عالمية توضح توزيع معدلات هطول الأمطار حول دول العالم.
-   - **Top 10 Emitters:** مخطط شريطي لأعلى 10 دول تصديراً لانبعاثات ثاني أكسيد الكربون.
+### 1. DateTime Parsing & Sorting
 
-3. **التحليل الاستكشافي للبيانات (Exploratory Data Analysis - EDA):**
-   - إحصاءات وصفية شاملة لجميع المتغيرات (`describe`).
-   - مخططات التوزيع التكراري ومخططات تقدير كثافة النواة (KDE Plots).
-   - مصفوفة الارتباط الخطي (Correlation Heatmap) بين المؤشرات البيئية.
-   - مخططات الصندوق (Boxplots) لرصد التوزيعات وحالات التشتت.
+- Converted the `Date` column into a standardized datetime format using `pd.to_datetime()`.
+- Extracted the `Year` column to facilitate temporal filtering and annual statistical analysis.
+- Sorted records chronologically in ascending order using `sort_values` to ensure accurate time-series analysis.
 
-4. **تحليل التجميع ونماذج الذكاء الاصطناعي (Clustering & AI Models):**
-   - **K-Means Clustering:** تجميع ديناميكي مع إمكانية تحديد عدد المجموعات ($k$) عبر شريط تمرير تفاعلي، وحساب معامل الجودة **Silhouette Score**.
-   - **DBSCAN Clustering:** تجميع يعتمد على الكثافة مزود بمنحنى خوارزمية **Knee Method** (أقرب الجيران $k$-NN) لاختيار المسافة المثلى $\epsilon$، مع معالجة النقاط الشاذة والضوضاء.
-   - **Deep Learning Autoencoder:** شبكة عصبية مبنية بواسطة **TensorFlow / Keras** لضغط البيانات من 5 أبعاد إلى بعدين كامنين (2D Latent Space) وعرضها تفاعلياً.
-   - **أداء مُحسّن وسريع:** استخدام `@st.cache_resource` لتخزين أوزان النموذج العصبوني وتفادي إعادة التدريب الثقيل مع كل تغيير في الفلاتر.
+### 2. Handling Missing Values
 
-5. **التقرير النهائي التفاعلي (Final Report):**
-   - ملخص شامل يربط مؤشرات الأداء الفعلية والأرقام الحية للبيانات والنماذج تلقائياً.
+- Inspected records and validated data integrity.
+- Removed records containing invalid dates using `dropna(subset=['Date'])`.
+
+### 3. Outlier Detection & Removal
+
+- Applied the statistical **Z-Score** method using NumPy arrays and SciPy to calculate each observation's deviation from the mean.
+- Filtered and removed extreme values exceeding the `±3σ` threshold across all numerical features:
+  - Temperature
+  - CO2 Emissions
+  - Precipitation
+  - Humidity
+  - Wind Speed
+- Successfully removed **57 outliers**, resulting in a cleaned dataset containing **9,943 records**.
+
+### 4. Feature Scaling for Deep Learning
+
+- Applied `MinMaxScaler` to normalize the five numerical features to the `[0, 1]` range before feeding them into the Autoencoder.
+- This ensures mathematical compatibility with the `sigmoid` activation function used in the decoder.
 
 ---
 
-## 📁 هيكل المشروع (Project Structure)
+## ✨ Key Features
+
+### 1. Home Dashboard
+
+- An advanced sidebar for filtering climate data by country/location, climate variable, and year range.
+- An interactive data table displaying filtered observations in real time.
+
+### 2. Advanced Data Visualizations (Graphs)
+
+- **Dual-Axis Chart:** An interactive time-series visualization illustrating the relationship between temperature and `CO2` emissions.
+- **Global Choropleth Map:** A geographical heat map showing precipitation distribution across countries worldwide.
+- **Top 10 Emitters:** A bar chart displaying the ten countries with the highest carbon dioxide emissions.
+
+### 3. Exploratory Data Analysis (EDA)
+
+- Comprehensive descriptive statistics for all numerical variables using `describe()`.
+- Distribution histograms and Kernel Density Estimation (**KDE**) plots.
+- A correlation heatmap illustrating relationships between environmental indicators.
+- Boxplots for examining statistical distributions, dispersion, and potential outliers.
+
+### 4. Clustering Analysis & AI Models
+
+**K-Means Clustering**
+
+- Dynamic clustering with an interactive slider for selecting the number of clusters (`k`).
+- Cluster quality evaluation using the **Silhouette Score**.
+
+**DBSCAN Clustering**
+
+- Density-based clustering supported by the **Knee Method**, using `k`-Nearest Neighbors (k-NN) to help determine an appropriate epsilon (`ϵ`) distance threshold.
+- Handles noise points and outliers during clustering analysis.
+
+**Deep Learning Autoencoder**
+
+- A neural network built using **TensorFlow / Keras**.
+- Compresses five-dimensional climate data into a **two-dimensional latent space (2D Latent Space)**.
+- Provides interactive visualizations of the compressed representations.
+
+**Optimized Performance**
+
+- Uses `@st.cache_resource` to cache trained neural network models and prevent computationally expensive retraining whenever dashboard filters are changed.
+
+### 5. Interactive Final Report
+
+- A comprehensive summary that dynamically displays actual dataset statistics, evaluation metrics, and model results.
+- Automatically integrates calculated performance indicators and real-time data values.
+
+---
+
+## 📁 Project Structure
 
 ```text
 climate-AI/
 │
-├── climate_change_data.csv    # مجموعة البيانات المناخية الأصلية (10,000 سجل)
-├── main.py                    # الكود البرمجي الرئيسي المنظم في دوال معيارية وواجهة Streamlit
-├── style.css                  # التنسيقات المخصصة لواجهة المستخدم المربوطة بالتطبيق
-├── requirements.txt           # المكتبات والاعتماديات الأساسية لتشغيل المشروع
-├── requirements-dev.txt       # مكتبات بيئة التطوير والاختبارات الأوتوماتيكية (pytest)
-├── .gitignore                 # استبعاد ملفات الكاش، البيئات الافتراضية، وسجلات التشغيل
-├── README.md                  # دليل المشروع والتوثيق الرئيسي
+├── climate_change_data.csv       # Original climate dataset (10,000 records)
+├── main.py                       # Main application and modular Streamlit interface
+├── style.css                     # Custom styles integrated into the application
+├── requirements.txt              # Core application dependencies
+├── requirements-dev.txt          # Development and automated testing dependencies
+├── .gitignore                    # Excludes caches, virtual environments, and logs
+├── README.md                     # Main project documentation
 │
-├── docs/                      # مجلد التوثيق والتقارير الفنية
-│   ├── BUG_REPORT.md          # توثيق الأخطاء المكتشفة وسجل معالجتها بدقة
-│   ├── TEST_REPORT.md         # التقرير الفني الشامل لنتائج الفحص والاختبارات
-│   └── TESTING_GUIDE.md       # دليل إرشادي مفصل لكيفية تشغيل وفحص الاختبارات
+├── docs/                         # Technical documentation and reports
+│   ├── BUG_REPORT.md             # Documented bugs and remediation history
+│   ├── TEST_REPORT.md            # Comprehensive testing and validation report
+│   └── TESTING_GUIDE.md          # Detailed instructions for running tests
 │
-└── tests/                     # حزمة الاختبارات البرمجية الأوتوماتيكية (47 اختباراً ناجحاً)
-    ├── conftest.py            # البيانات التجريبية والفيكستشرز (Fixtures)
-    ├── test_imports.py        # فحص استيراد المكتبات والتوافقية
-    ├── test_data_loading.py   # فحص قراءة البيانات وفرزها زمنياً
-    ├── test_data_validation.py# فحص سلامة الحقول والحدود الفيزيائية
-    ├── test_preprocessing.py  # فحص تنظيف القيم الشاذة و Z-score
-    ├── test_models.py         # فحص بنية K-Means و DBSCAN و Autoencoder
-    ├── test_model_loading.py  # فحص حفظ واسترجاع النماذج وإعداداتها
-    ├── test_model_prediction.py # فحص عمليات التنبؤ والاستدلال (Inference)
-    ├── test_model_evaluation.py # فحص دقة المقاييس (Silhouette, MSE)
-    ├── test_regression.py     # اختبارات الانحدار المخصصة للأخطاء BUG-001 إلى BUG-009
-    ├── test_visualization.py  # فحص توليد المخططات والخرائط
-    ├── test_application.py    # فحص ملف التنسيقات وفلاتر الواجهة
-    └── README.md              # دليل مفصل لحزمة الاختبارات
+└── tests/                        # Automated test suite (47 passing tests)
+    ├── conftest.py               # Test fixtures and sample datasets
+    ├── test_imports.py           # Dependency and import validation
+    ├── test_data_loading.py      # Data loading and chronological sorting tests
+    ├── test_data_validation.py   # Dataset schema and physical bounds validation
+    ├── test_preprocessing.py     # Outlier removal and Z-score validation
+    ├── test_models.py            # K-Means, DBSCAN, and Autoencoder tests
+    ├── test_model_loading.py     # Model persistence and configuration tests
+    ├── test_model_prediction.py  # Prediction and inference tests
+    ├── test_model_evaluation.py  # Evaluation metrics (Silhouette, MSE)
+    ├── test_regression.py        # Regression tests for BUG-001 through BUG-009
+    ├── test_visualization.py     # Chart and map generation tests
+    ├── test_application.py       # Application CSS and filtering integration
+    └── README.md                 # Test suite documentation
 ```
 
 ---
 
-## 🛠️ المتطلبات البرمجية (Requirements)
+## 🛠️ Requirements
 
-- **Python 3.9+** (تم اختباره واعتماده على Python 3.11.5)
-- **المكتبات الأساسية للتشغيل ([requirements.txt](file:///f:/climate-AI/requirements.txt)):**
-  - `streamlit>=1.25.0`
-  - `pandas>=2.0.0`
-  - `numpy>=1.24.0`
-  - `scipy>=1.10.0`
-  - `scikit-learn>=1.3.0`
-  - `tensorflow>=2.13.0`
-  - `plotly>=5.15.0`
-  - `matplotlib>=3.7.0`
-  - `seaborn>=0.12.0`
-  - `streamlit-option-menu>=0.3.6`
-- **مكتبات التطوير والاختبار ([requirements-dev.txt](file:///f:/climate-AI/requirements-dev.txt)):**
-  - `pytest>=7.4.0`
-  - `pytest-cov>=4.1.0`
-  - `flake8>=6.1.0`
+### Python Version
+
+- **Python 3.9+**
+- Tested and validated using **Python 3.11.5**
+
+### Core Dependencies (`requirements.txt`)
+
+```text
+streamlit>=1.25.0
+pandas>=2.0.0
+numpy>=1.24.0
+scipy>=1.10.0
+scikit-learn>=1.3.0
+tensorflow>=2.13.0
+plotly>=5.15.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+streamlit-option-menu>=0.3.6
+```
+
+### Development & Testing Dependencies (`requirements-dev.txt`)
+
+```text
+pytest>=7.4.0
+pytest-cov>=4.1.0
+flake8>=6.1.0
+```
 
 ---
 
-## 🚀 طريقة التثبيت والتشغيل (How to Run)
+## 🚀 Installation & Setup
 
-### 1. الانتقال لمجلد المشروع:
+Follow these steps to install and run the application locally.
+
+### 1. Navigate to the Project Directory
+
+Open a terminal in the project directory.
+
+For the local Windows installation:
+
 ```bash
-cd f:/climate-AI
+cd /f/climate-AI
 ```
 
-### 2. (موصى به) إنشاء بيئة افتراضية وتفعيلها:
-- **في بيئة Windows (PowerShell):**
-  ```powershell
-  python -m venv venv
-  .\venv\Scripts\Activate.ps1
-  ```
-- **في بيئة Linux / macOS أو Git Bash:**
-  ```bash
-  python3 -m venv venv
-  source venv/bin/activate
-  ```
+This example uses Git Bash. Replace the path with your local project directory if necessary.
 
-### 3. تثبيت المكتبات المطلوبة:
+### 2. Create and Activate a Virtual Environment (Recommended)
+
+**Windows — PowerShell:**
+
+```powershell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+```
+
+**Windows — Git Bash:**
+
 ```bash
-# تثبيت متطلبات التشغيل
+python -m venv venv
+source venv/Scripts/activate
+```
+
+**Linux / macOS:**
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 3. Install Required Dependencies
+
+Install the core application dependencies:
+
+```bash
 pip install -r requirements.txt
+```
 
-# (اختياري) تثبيت أدوات الاختبار
+Optionally, install development and testing tools:
+
+```bash
 pip install -r requirements-dev.txt
 ```
 
-### 4. تشغيل التطبيق عبر Streamlit:
+### 4. Run the Streamlit Application
+
+Start the application using:
+
 ```bash
 streamlit run main.py
 ```
-يفتح التطبيق تلقائياً في المتصفح عبر الرابط:
-`http://localhost:8501`
+
+Once the application starts successfully, it should automatically open in your default web browser.
+
+Alternatively, open the following URL:
+
+**http://localhost:8501**
 
 ---
 
-## 🧪 تشغيل الاختبارات الأوتوماتيكية (Running Automated Tests)
+## 🧪 Running Automated Tests
 
-يحتوي المشروع على جناح اختبارات يضم **47 اختباراً أوتوماتيكياً** يغطي كافة جوانب البيانات، النماذج، والواجهة:
+The project includes a comprehensive automated testing suite containing **47 tests**, covering data processing, AI models, application functionality, and regression validation.
+
+### Run All Tests
+
+Execute the following command from the project root:
 
 ```bash
 python -m pytest tests/ -v
 ```
 
-**نتيجة الفحص:**
+### Test Results
+
+The reported automated test execution completed successfully:
+
 ```text
 ======================== 47 passed in 6.92s ========================
 ```
 
-للمزيد من التفاصيل حول كيفية تشغيل الاختبارات في بيئة VS Code واستعراض التغطية وتفاصيل الفحص، يرجى مراجعة:
-- [docs/TESTING_GUIDE.md](file:///f:/climate-AI/docs/TESTING_GUIDE.md) — دليل تشغيل الاختبارات واستكشاف الأخطاء.
-- [docs/TEST_REPORT.md](file:///f:/climate-AI/docs/TEST_REPORT.md) — التقرير الفني الشامل لحالة المشروع.
-- [docs/BUG_REPORT.md](file:///f:/climate-AI/docs/BUG_REPORT.md) — سجل الأخطاء التي تم حلها.
+All 47 automated test cases passed successfully during the reported validation run.
+
+### Additional Testing Documentation
+
+For more information about running tests in VS Code, examining test coverage, and reviewing technical validation results, refer to the following files:
+
+- **[Testing Guide](docs/TESTING_GUIDE.md)** — Step-by-step instructions for running automated tests and troubleshooting common issues.
+- **[Test Report](docs/TEST_REPORT.md)** — Comprehensive technical testing and project validation results.
+- **[Bug Report](docs/BUG_REPORT.md)** — Documented defects, implemented fixes, and regression verification history.
+
+---
